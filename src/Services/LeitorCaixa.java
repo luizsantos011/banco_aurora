@@ -37,7 +37,7 @@ public class LeitorCaixa implements ILeitor {
 
                 BigDecimal valorHeader = BigDecimal.valueOf(buffer.getDouble());
 
-                lote = new Lote(idLote, LocalDateTime.now(), valorHeader);
+                lote = new Lote(Lote.Estado.SE, 1, LocalDateTime.now());
                 buffer.clear();
             } else {
                 throw new OperacaoInvalidaException("Arquivo binário vazio ou sem cabeçalho.");
@@ -63,10 +63,6 @@ public class LeitorCaixa implements ILeitor {
                     lote.adicionarTransacao(new Transacao(origem, destino, valor));
                 }
                 buffer.clear();
-            }
-
-            if (lote !=  null && !lote.validarIntegridade()) {
-                throw new OperacaoInvalidaException("Quebra de integridade: Soma das transações não confere com o Header.");
             }
 
             return lote;

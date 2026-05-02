@@ -1,7 +1,6 @@
 package Models;
 
 import Exceptions.IdInvalidoException;
-import Exceptions.ValorInvalidoException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,29 +11,23 @@ public class Lote {
     private final String id;
     private final Estado estado;
     private final LocalDateTime dataCriacao;
-    private BigDecimal valorTotal; // Removido 'final' para permitir soma em tempo real
+    private BigDecimal valorTotal;
     private List<Transacao> transacoes;
 
-    // Enum público para ser usado no WatchService e em outros Models
     public enum Estado { SE, BA, AL, PE }
 
-    public Lote(String id, Estado estado, LocalDateTime dataCriacao) {
-        validarId(id);
-        this.id = id;
+    public Lote(Estado estado, int sequencial, LocalDateTime dataCriacao) {
+        this.id = String.format("%s-%04d", sequencial);
         this.estado = estado;
         this.dataCriacao = dataCriacao;
         this.valorTotal = BigDecimal.ZERO;
         this.transacoes = new ArrayList<>();
     }
 
-    private void validarId(String id) {
-        if (id == null) throw new NullPointerException("Id não pode ser nulo");
-        if (id.isBlank()) throw new IllegalArgumentException("Id não pode ser vazio");
-        // Valida o padrão SD-0001 (Duas letras, hífen, quatro números)
-        if (!id.matches("[A-Z]{2}-\\d{4}")) throw new IdInvalidoException("Formato de ID inválido. Use EX: SE-0001");
+    private void validarSequencial(int sequencial){
+        if(sequencial < 1 || sequencial > 9999)throw new IdInvalidoException("Sequencial deve estar entre 1 e 9999");
     }
 
-    // Método principal para sua nova filosofia de Watch Service
     public void adicionarTransacao(Transacao t) {
         if (t == null) throw new NullPointerException("Transação nula");
         this.transacoes.add(t);

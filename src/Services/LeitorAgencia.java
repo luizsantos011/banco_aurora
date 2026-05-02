@@ -59,7 +59,7 @@ public class LeitorAgencia implements ILeitor {
                 throw new OperacaoInvalidaException("O arquivo não contém transações válidas.");
             }
 
-            Lote loteFinal = new Lote("AG-1001", LocalDateTime.now(), somaTotal);
+            Lote loteFinal = new Lote(Lote.Estado.SE,2, LocalDateTime.now());
             for (Transacao t : transacoes) {
                 loteFinal.adicionarTransacao(t);
             }
