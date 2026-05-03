@@ -16,8 +16,8 @@ public class Lote {
 
     public enum Estado { SE, BA, AL, PE }
 
-    public Lote(Estado estado, int sequencial, LocalDateTime dataCriacao) {
-        this.id = String.format("%s-%04d", sequencial);
+    public Lote(Estado estado, int numeroFilial, LocalDateTime dataCriacao) {
+        this.id = String.format("%s-%04d", numeroFilial);
         this.estado = estado;
         this.dataCriacao = dataCriacao;
         this.valorTotal = BigDecimal.ZERO;

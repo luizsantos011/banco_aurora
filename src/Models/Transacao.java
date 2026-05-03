@@ -2,19 +2,28 @@ package Models;
 
 import Exceptions.ContaInvalidaException;
 import Exceptions.ValorInvalidoException;
-
+import Models.Lote.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class Transacao {
+    private final Estado estado;
+    private final int numeroFilial;
+    private final String codigoTransacao;
+    private final String idTransacao;
     private final String origem;
     private final String destino;
     private final BigDecimal valor;
     private final LocalDateTime dataTransacao;
 
-    public Transacao(String origem, String destino,  BigDecimal valor) {
+    public Transacao(Estado estado, int numeroFilial, String origem, String destino,  BigDecimal valor) {
         validarContas(origem, destino);
         validarValor(valor);
+        this.codigoTransacao = UUID.randomUUID().toString();
+        this.estado = estado;
+        this.numeroFilial = numeroFilial;
+        this.idTransacao = String.format("%s-%d-%s",estado,numeroFilial,codigoTransacao);
         this.origem = origem;
         this.destino = destino;
         this.valor = valor;
@@ -34,6 +43,10 @@ public class Transacao {
         if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ValorInvalidoException("Valor da transação inválido!");
         }
+    }
+
+    public Estado getEstado() {
+        return estado;
     }
 
     public String getOrigem() {

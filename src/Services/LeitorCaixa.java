@@ -22,7 +22,7 @@ public class LeitorCaixa implements ILeitor {
     }
 
     @Override
-    public Lote lerArquivo(Path caminho) {
+    public Transacao lerArquivo(Path caminho) {
         Lote lote = null;
 
         try (FileChannel canal = FileChannel.open(caminho, StandardOpenOption.READ)) {
@@ -65,7 +65,7 @@ public class LeitorCaixa implements ILeitor {
                 buffer.clear();
             }
 
-            return lote;
+            return Transacao;
 
         } catch (IOException e) {
             throw new RuntimeException("Falha técnica no acesso ao arquivo binário", e);

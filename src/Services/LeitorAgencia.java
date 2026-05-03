@@ -2,8 +2,8 @@ package Services;
 
 import Contracts.ILeitor;
 import Contracts.ILogger;
-import Models.Lote;
-import Models.Transacao;
+import Models.Lote.*;
+import Models.*;
 import Exceptions.*;
 
 import java.io.BufferedReader;
@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class LeitorAgencia implements ILeitor {
     private final ILogger logger;
@@ -23,9 +20,8 @@ public class LeitorAgencia implements ILeitor {
     }
 
     @Override
-    public Lote lerArquivo(Path caminho) {
-        List<Transacao> transacoes = new ArrayList<>();
-        BigDecimal somaTotal = BigDecimal.ZERO;
+    public Transacao lerArquivo(Path caminho) {
+        Transacao transacao = null;
 
         try (BufferedReader br = Files.newBufferedReader(caminho)) {
             String linha;
@@ -33,39 +29,32 @@ public class LeitorAgencia implements ILeitor {
                 if (linha.trim().isEmpty()) continue;
 
                 String[] partes = linha.split(";");
-                if (partes.length != 3) {
+                if (partes.length != 4) {
                     throw new OperacaoInvalidaException("Formato de colunas inválido: " + linha);
                 }
 
-                String origem = partes[0].trim();
-                String destino = partes[1].trim();
+                String filial = partes[0];
+                String[] partesFilial = filial.split("-");
+                if (partesFilial.length != 2) {
+                    throw new OperacaoInvalidaException("Formato de filial inválido: " + filial);
+                }
+                Estado estado = Estado.valueOf(partesFilial[0]);
+                int numeroFilial = Integer.parseInt(partesFilial[1]);
+                String origem = partes[1].trim();
+                String destino = partes[2].trim();
 
                 BigDecimal valor;
                 try {
-                    valor = new BigDecimal(partes[2].trim().replace(",", "."));
+                    valor = new BigDecimal(partes[3].trim().replace(",", "."));
                 } catch (NumberFormatException e) {
                     throw new ValorInvalidoException("Valor numérico inválido na linha: " + linha);
                 }
-
-                if (valor.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new ValorInvalidoException("Valor deve ser positivo. Linha: " + linha);
-                }
-
-                transacoes.add(new Transacao(origem, destino, valor));
-                somaTotal = somaTotal.add(valor);
+                transacao = new Transacao(estado,numeroFilial, origem, destino, valor);
             }
 
-            if (transacoes.isEmpty()) {
-                throw new OperacaoInvalidaException("O arquivo não contém transações válidas.");
-            }
+            if(transacao == null) throw new OperacaoInvalidaException("Arquivo de texto vazio ou sem transações válidas.");
 
-            Lote loteFinal = new Lote(Lote.Estado.SE,2, LocalDateTime.now());
-            for (Transacao t : transacoes) {
-                loteFinal.adicionarTransacao(t);
-            }
-
-            return loteFinal;
-
+            return transacao;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
