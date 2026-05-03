@@ -49,6 +49,10 @@ public class Transacao {
         return estado;
     }
 
+    public int getNumeroFilial() {
+        return numeroFilial;
+    }
+
     public String getOrigem() {
         return origem;
     }

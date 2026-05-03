@@ -3,6 +3,7 @@ package Services;
 import Contracts.ILeitor;
 import Contracts.ILogger;
 import Models.Lote;
+import Models.Lote.Estado;
 import Models.Transacao;
 import Exceptions.*;
 
@@ -12,7 +13,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
 
 public class LeitorCaixa implements ILeitor {
     private final ILogger logger;
@@ -23,29 +23,22 @@ public class LeitorCaixa implements ILeitor {
 
     @Override
     public Transacao lerArquivo(Path caminho) {
-        Lote lote = null;
+        Transacao transacao = null;
 
         try (FileChannel canal = FileChannel.open(caminho, StandardOpenOption.READ)) {
             ByteBuffer buffer = ByteBuffer.allocate(64);
 
-            if (canal.read(buffer) != -1) {
-                buffer.flip();
-
-                byte[] bId = new byte[7];
-                buffer.get(bId);
-                String idLote = new String(bId).trim();
-
-                BigDecimal valorHeader = BigDecimal.valueOf(buffer.getDouble());
-
-                lote = new Lote(Lote.Estado.SE, 1, LocalDateTime.now());
-                buffer.clear();
-            } else {
-                throw new OperacaoInvalidaException("Arquivo binário vazio ou sem cabeçalho.");
-            }
-
             while (canal.read(buffer) != -1) {
                 buffer.flip();
-                if (buffer.remaining() >= 48) {
+                if (buffer.remaining() >= 55) {
+                    byte[] bEstado = new byte[3];
+                    buffer.get(bEstado);
+                    Estado estado = Estado.valueOf(new String(bEstado).trim());
+
+                    byte[] bNumeroFilial = new byte[4];
+                    buffer.get(bNumeroFilial);
+                    int numeroFilial = Integer.parseInt(new String(bNumeroFilial).trim());
+
                     byte[] bOrigem = new byte[20];
                     buffer.get(bOrigem);
                     String origem = new String(bOrigem).trim();
@@ -59,14 +52,12 @@ public class LeitorCaixa implements ILeitor {
                     if (valor.compareTo(BigDecimal.ZERO) <= 0) {
                         throw new ValorInvalidoException("Valor inválido encontrado no corpo do arquivo binário.");
                     }
-
-                    lote.adicionarTransacao(new Transacao(origem, destino, valor));
+                    transacao = new Transacao(estado, numeroFilial, origem, destino, valor);
                 }
                 buffer.clear();
             }
-
-            return Transacao;
-
+            if (transacao == null) throw new OperacaoInvalidaException("Arquivo binário vazio ou sem transações válidas.");
+            return transacao;
         } catch (IOException e) {
             throw new RuntimeException("Falha técnica no acesso ao arquivo binário", e);
         }

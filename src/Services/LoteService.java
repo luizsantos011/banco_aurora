@@ -1,27 +1,27 @@
 package Services;
 
 import Contracts.ILeitor;
-import Contracts.ILote;
+import Contracts.ILoteService;
 import Models.Lote;
 import Models.Transacao;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LoteService implements ILote {
+public class LoteService implements ILoteService {
     private ILeitor leitor;
-    private ILote lote;
-    private final Map<String, Lote> lotesEmMemoria = new HashMap<>();
+    private Map<String, Lote> lotes = new HashMap<>();
 
     public LoteService(ILeitor leitor, ILeitor leitorCaixa) {
         this.leitor = leitor;
     }
     @Override
     public void adicionarTransacao(Transacao transacao) {
-
-    private void criarLote(){
-
+        String chave = transacao.getEstado() + "-" + transacao.getNumeroFilial();
+        if(!lotes.containsKey(chave)){
+            Lote novoLote = new Lote(transacao.getEstado(), transacao.getNumeroFilial());
+            lotes.put(chave, novoLote);
         }
+        lotes.get(chave).adicionarTransacao(transacao);
     }
 }

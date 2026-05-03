@@ -16,10 +16,11 @@ public class Lote {
 
     public enum Estado { SE, BA, AL, PE }
 
-    public Lote(Estado estado, int numeroFilial, LocalDateTime dataCriacao) {
+    public Lote(Estado estado, int numeroFilial) {
+        validarSequencial(numeroFilial);
         this.id = String.format("%s-%04d", numeroFilial);
         this.estado = estado;
-        this.dataCriacao = dataCriacao;
+        this.dataCriacao = LocalDateTime.now();
         this.valorTotal = BigDecimal.ZERO;
         this.transacoes = new ArrayList<>();
     }

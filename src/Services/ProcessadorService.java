@@ -2,11 +2,9 @@ package Services;
 
 import Contracts.*;
 import Models.*;
-import Repository.ArquivoRepository;
 import Exceptions.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,30 +12,44 @@ import java.util.List;
 public class ProcessadorService implements IProcessadorService {
     private final ILeitor leitorAgencia;
     private final ILeitor leitorCaixa;
-    private final ILote iLote;
+    private final ILoteService iLoteService;
     private final ILogger logger;
     private final IArquivoRepository repository;
     private final RelatorioFinal relatorio;
-    private final List<Transacao> todasAsTransacoes;
 
-    public ProcessadorService(ILeitor leitorAgencia, ILeitor leitorCaixa, ILote iLote, ILogger logger,
+    public ProcessadorService(ILeitor leitorAgencia, ILeitor leitorCaixa, ILoteService iLoteService, ILogger logger,
                               IArquivoRepository repository, RelatorioFinal relatorio) {
         this.leitorAgencia = leitorAgencia;
         this.leitorCaixa = leitorCaixa;
-        this.iLote = iLote;
+        this.iLoteService = iLoteService;
         this.logger = logger;
         this.repository = repository;
         this.relatorio = relatorio;
-        this.todasAsTransacoes = new ArrayList<>();
     }
 
+    @Override
     public void processarArquivo(Path caminho) {
+        ArquivoImportado arquivoImportado = null;
         try{
             ILeitor leitor = selecionarLeitor(caminho);
             Transacao t = leitor.lerArquivo(caminho);
-
-        }catch(Exception e){
-            System.out.println("Deu ruim ai.");
+            arquivoImportado = repository.preparar(caminho);
+            iLoteService.adicionarTransacao(t);
+            relatorio.registrarSucesso(t.getValor());
+            relatorio.incrementarArquivos();
+            logger.registrarSucesso("Arquivo processado com sucesso: " + caminho.getFileName());
+        }catch(IOException e){
+            relatorio.registrarFalha();
+            logger.registrarErro("Erro ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());
+        }catch(FormatoArquivoInvalidoException | ValorInvalidoException | OperacaoInvalidaException e){
+            relatorio.registrarFalha();
+            logger.registrarErro("Erro ao processar arquivo: " + caminho.getFileName());
+        }catch (RuntimeException e){
+            relatorio.registrarFalha();
+            logger.registrarErro("Erro inesperado ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());
+        }catch (Exception e) {
+            relatorio.registrarFalha();
+            logger.registrarErro("Erro inesperado ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());
         }
     }
     private ILeitor selecionarLeitor(Path caminho) {

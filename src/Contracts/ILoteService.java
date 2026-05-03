@@ -4,6 +4,6 @@ package Contracts;
 import Models.Transacao;
 
 
-public interface ILote {
+public interface ILoteService {
     void adicionarTransacao(Transacao transacao);
 }
