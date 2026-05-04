@@ -9,11 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LoteService implements ILoteService {
-    private ILeitor leitor;
     private Map<String, Lote> lotes = new HashMap<>();
 
-    public LoteService(ILeitor leitor, ILeitor leitorCaixa) {
-        this.leitor = leitor;
+    public LoteService() {
     }
     @Override
     public void adicionarTransacao(Transacao transacao) {

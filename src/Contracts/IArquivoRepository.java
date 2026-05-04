@@ -8,6 +8,5 @@ import java.nio.file.Path;
 public interface IArquivoRepository {
     ArquivoImportado preparar(Path caminho) throws IOException;
     void finalizarComSucesso(ArquivoImportado arquivo) throws IOException;
-    void finalizarComErro(ArquivoImportado arquivo) throws IOException;
-    void tratarFalhaCritica(Path caminho);
+    void tratarFalha(Path caminho);
 }
