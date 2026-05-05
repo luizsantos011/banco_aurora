@@ -2,12 +2,15 @@ package Repository;
 
 import Contracts.IArquivoRepository;
 import Contracts.ILogger;
+import Exceptions.OperacaoInvalidaException;
 import Models.*;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ArquivoRepository implements IArquivoRepository {
     private final ILogger logger;
@@ -61,9 +64,14 @@ public class ArquivoRepository implements IArquivoRepository {
     }
 
     public void finalizarComSucesso(ArquivoImportado arquivo) throws IOException {
-        Path destino = PathConfig.PROCESSADOS.resolve(arquivo.getNome());
-        Files.move(arquivo.getLocalizacao(), destino, StandardCopyOption.REPLACE_EXISTING);
-        logger.registrarSucesso("Arquivo finalizado com sucesso. Movido para PROCESSADOS: " + arquivo.getNome());
+        try{
+            validarDuplicidade(arquivo);
+            Path destino = PathConfig.PROCESSADOS.resolve(arquivo.getNome());
+            Files.move(arquivo.getLocalizacao(), destino, StandardCopyOption.REPLACE_EXISTING);
+            logger.registrarSucesso("Arquivo finalizado com sucesso. Movido para PROCESSADOS: " + arquivo.getNome());
+        }catch (OperacaoInvalidaException | IOException e) {
+            logger.registrarErro("Erro ao finalizar arquivo: " + e.getMessage());
+        }
     }
 
     public void limparQuarentena() {
@@ -78,6 +86,13 @@ public class ArquivoRepository implements IArquivoRepository {
             }
         } catch (IOException e) {
             logger.registrarErro("Erro ao limpar quarentena: " + e.getMessage());
+        }
+    }
+
+    private void validarDuplicidade(ArquivoImportado arquivo) {
+        Path destino = PathConfig.PROCESSADOS.resolve(arquivo.getNome());
+        if(Files.exists(destino)) {
+            throw new OperacaoInvalidaException("Arquivo já processado: " + arquivo.getNome());
         }
     }
 }
