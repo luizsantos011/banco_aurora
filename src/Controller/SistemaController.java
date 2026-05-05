@@ -17,10 +17,10 @@ public class SistemaController {
     private final ArquivoRepository arquivoRepository;
 
     public SistemaController() {
-        this.ambienteService = new AmbienteService();
         this.logger = new LogService();
         this.relatorio = new RelatorioFinal();
         this.loteService = new LoteService();
+        this.ambienteService = new AmbienteService(logger);
         this.arquivoRepository = new ArquivoRepository(logger);
         ILeitor leitorAgencia = new LeitorAgencia(logger);
         ILeitor leitorCaixa = new LeitorCaixa(logger);
@@ -28,12 +28,11 @@ public class SistemaController {
     }
 
     public void iniciarSistema() {
-        logger.registrarSucesso("Iniciando setup do sistema Aurora.");
         ambienteService.inicializarSistema();
         arquivoRepository.limparQuarentena();
         logger.registrarSucesso("Setup concluído. Monitorando diretório de entrada.");
-        monitorarDiretorio(Paths.get("input"));
-    }
+        monitorarDiretorio(PathConfig.ENTRADA_AGENCIAS);
+        monitorarDiretorio(PathConfig.ENTRADA_CAIXAS);}
 
     private void monitorarDiretorio(Path caminho) {
         try(WatchService ws = FileSystems.getDefault().newWatchService()) {

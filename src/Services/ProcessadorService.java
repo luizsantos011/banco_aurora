@@ -41,7 +41,6 @@ public class ProcessadorService implements IProcessadorService {
 
             repository.finalizarComSucesso(arquivoImportado);
             logger.registrarSucesso("Arquivo processado e finalizado com sucesso: " + caminho.getFileName());
-
         } catch (IOException e) {
             relatorio.registrarFalha();
             logger.registrarErro("Erro de E/S ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());

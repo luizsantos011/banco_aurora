@@ -1,11 +1,18 @@
 package Services;
 
+import Contracts.ILogger;
 import Models.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class AmbienteService {
+    private final ILogger logger;
+
+    public AmbienteService(ILogger logger) {
+        this.logger = logger;
+    }
+
     public void inicializarSistema() {
         Path[] caminhos = {
                 PathConfig.RAIZ,
@@ -27,9 +34,10 @@ public class AmbienteService {
                     System.out.println("[OK] Pasta criada: " + p.getFileName());
                 }
             } catch (IOException e) {
-                System.err.println("[ERRO] Não foi possível criar a pasta " + p + ": " + e.getMessage());
+                logger.registrarErro("Falha ao criar pasta " + p.getFileName() + ": " + e.getMessage());
             }
         }
+        logger.registrarSucesso("Iniciando setup do sistema Aurora.");
     }
 }
 

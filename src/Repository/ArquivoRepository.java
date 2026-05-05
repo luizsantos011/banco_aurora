@@ -73,7 +73,9 @@ public class ArquivoRepository implements IArquivoRepository {
                 Files.delete(arquivo);
                 deletados++;
             }
-            logger.registrarSucesso("Limpeza da quarentena realizada. Arquivos removidos: " + deletados);
+            if(deletados > 0) {
+                logger.registrarSucesso("Limpeza da quarentena realizada. Arquivos removidos: " + deletados);
+            }
         } catch (IOException e) {
             logger.registrarErro("Erro ao limpar quarentena: " + e.getMessage());
         }
