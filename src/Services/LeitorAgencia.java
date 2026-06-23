@@ -25,24 +25,27 @@ public class LeitorAgencia implements ILeitor {
 
         try (BufferedReader br = Files.newBufferedReader(caminho)) {
             String linha;
+
             while ((linha = br.readLine()) != null) {
                 if (linha.trim().isEmpty()) continue;
 
                 String[] partes = linha.split(";");
+
                 if (partes.length != 4) {
                     throw new OperacaoInvalidaException("Formato de colunas inválido: " + linha);
                 }
 
                 String filial = partes[0];
                 String[] partesFilial = filial.split("-");
+
                 if (partesFilial.length != 2) {
                     throw new OperacaoInvalidaException("Formato de filial inválido: " + filial);
                 }
+
                 Estado estado = Estado.valueOf(partesFilial[0]);
                 int numeroFilial = Integer.parseInt(partesFilial[1]);
                 String origem = partes[1].trim();
                 String destino = partes[2].trim();
-
                 BigDecimal valor;
                 try {
                     valor = new BigDecimal(partes[3].trim().replace(",", "."));
