@@ -27,11 +27,19 @@ public class LeitorCaixa implements ILeitor {
         List<Transacao> transacoes = new ArrayList<>();
 
         try (FileChannel canal = FileChannel.open(caminho, StandardOpenOption.READ)) {
-            ByteBuffer buffer = ByteBuffer.allocate(64);
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
 
             while (canal.read(buffer) != -1) {
                 buffer.flip();
-                if (buffer.remaining() >= 55) {
+                while (buffer.remaining() >= 4) {
+                    buffer.mark();
+                    int tamanhoPayLoad = buffer.getInt();
+
+                    if(buffer.remaining() <  tamanhoPayLoad) {
+                        buffer.reset();
+                        break;
+                    }
+
                     byte[] bEstado = new byte[3];
                     buffer.get(bEstado);
                     Estado estado = Estado.valueOf(new String(bEstado).trim());
@@ -56,7 +64,7 @@ public class LeitorCaixa implements ILeitor {
                     Transacao transacao = new Transacao(estado, numeroFilial, origem, destino, valor);
                     transacoes.add(transacao);
                 }
-                buffer.clear();
+                buffer.compact();
             }
             if (transacoes.isEmpty()) throw new OperacaoInvalidaException("Arquivo binário vazio ou sem transações válidas.");
             return transacoes;
