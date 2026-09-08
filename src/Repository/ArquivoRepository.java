@@ -5,7 +5,6 @@ import Contracts.ILogger;
 import Exceptions.OperacaoInvalidaException;
 import Models.*;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -71,21 +70,6 @@ public class ArquivoRepository implements IArquivoRepository {
             logger.registrarSucesso("Arquivo finalizado com sucesso. Movido para PROCESSADOS: " + arquivo.getNome());
         } catch (IOException e) {
             throw new IOException("Falha ao mover arquivo para a pasta PROCESSADOS: " + e.getMessage(), e);
-        }
-    }
-
-    public void limparQuarentena() {
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(PathConfig.QUARENTENA)) {
-            int deletados = 0;
-            for (Path arquivo : stream) {
-                Files.delete(arquivo);
-                deletados++;
-            }
-            if (deletados > 0) {
-                logger.registrarSucesso("Limpeza da quarentena realizada. Arquivos removidos: " + deletados);
-            }
-        } catch (IOException e) {
-            logger.registrarErro("Erro ao limpar quarentena: " + e.getMessage());
         }
     }
 
