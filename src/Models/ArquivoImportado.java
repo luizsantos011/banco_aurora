@@ -26,7 +26,7 @@ public class ArquivoImportado {
     private void validarNome(String nome) {
         if(nome == null)throw new NullPointerException("Nome do arquivo não pode ser nulo.");
         if(nome.isBlank())throw new IllegalArgumentException("Nome do arquivo não pode ser vazio.");
-        if(!nome.toLowerCase().endsWith(".txt") && !nome.toLowerCase().endsWith(".dat")){
+        if(!nome.toLowerCase().endsWith(".txt") && !nome.toLowerCase().endsWith(".bin")){
             throw new NomeInvalidoException("Nome do arquivo deve terminar com .txt ou .dat");
         }
     }
