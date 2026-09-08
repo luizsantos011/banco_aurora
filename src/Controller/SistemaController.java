@@ -30,24 +30,31 @@ public class SistemaController {
     public void iniciarSistema() {
         ambienteService.inicializarSistema();
         arquivoRepository.limparQuarentena();
-        logger.registrarSucesso("Setup concluído. Monitorando diretório de entrada.");
-        monitorarDiretorio(PathConfig.ENTRADA_AGENCIAS);
-        monitorarDiretorio(PathConfig.ENTRADA_CAIXAS);}
+        logger.registrarSucesso("Setup concluído. Monitorando diretórios de entrada.");
+        monitorarDiretorios(PathConfig.ENTRADA_AGENCIAS, PathConfig.ENTRADA_CAIXAS);
+    }
 
-    private void monitorarDiretorio(Path caminho) {
-        try(WatchService ws = FileSystems.getDefault().newWatchService()) {
-            caminho.register(ws, StandardWatchEventKinds.ENTRY_CREATE);
+    private void monitorarDiretorios(Path... diretorios) {
+        try (WatchService ws = FileSystems.getDefault().newWatchService()) {
+            for (Path dir : diretorios) {
+                dir.register(ws, StandardWatchEventKinds.ENTRY_CREATE);
+            }
+
             while (true) {
                 WatchKey chave = ws.take();
+                Path diretorioPai = (Path) chave.watchable();
+
                 for (WatchEvent<?> evento : chave.pollEvents()) {
                     Path nomeArquivo = (Path) evento.context();
-                    Path caminhoCompleto = caminho.resolve(nomeArquivo);
-                    if(Files.isRegularFile(caminhoCompleto)) {
-                        logger.registrarSucesso("Evento detectado: Novo arquivo identificado em " + nomeArquivo);
+                    Path caminhoCompleto = diretorioPai.resolve(nomeArquivo);
+
+                    if (Files.isRegularFile(caminhoCompleto)) {
+                        logger.registrarSucesso("Evento detectado: Novo arquivo identificado em " + caminhoCompleto);
                         processadorService.processarArquivo(caminhoCompleto);
                     }
                 }
-                if(!chave.reset()) {
+
+                if (!chave.reset()) {
                     logger.registrarErro("Falha ao resetar WatchKey. Encerrando monitoramento.");
                     break;
                 }
