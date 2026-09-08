@@ -29,7 +29,6 @@ public class SistemaController {
 
     public void iniciarSistema() {
         ambienteService.inicializarSistema();
-        arquivoRepository.limparQuarentena();
         logger.registrarSucesso("Setup concluído. Monitorando diretórios de entrada.");
         monitorarDiretorios(PathConfig.ENTRADA_AGENCIAS, PathConfig.ENTRADA_CAIXAS);
     }
