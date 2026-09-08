@@ -35,6 +35,7 @@ public class ProcessadorService implements IProcessadorService {
             List<Transacao> transacoes = leitor.lerArquivo(caminho);
 
             arquivoImportado = repository.preparar(caminho);
+            repository.finalizarComSucesso(arquivoImportado);
 
             for (Transacao t : transacoes) {
                 iLoteService.adicionarTransacao(t);
@@ -42,7 +43,6 @@ public class ProcessadorService implements IProcessadorService {
             }
 
             relatorio.incrementarArquivos();
-            repository.finalizarComSucesso(arquivoImportado);
             logger.registrarSucesso("Arquivo processado e finalizado com sucesso: " + caminho.getFileName());
 
         } catch (IOException e) {
