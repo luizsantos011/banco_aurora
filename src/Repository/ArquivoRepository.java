@@ -9,8 +9,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ArquivoRepository implements IArquivoRepository {
     private final ILogger logger;
@@ -63,14 +61,16 @@ public class ArquivoRepository implements IArquivoRepository {
         }
     }
 
+    @Override
     public void finalizarComSucesso(ArquivoImportado arquivo) throws IOException {
-        try{
-            validarDuplicidade(arquivo);
-            Path destino = PathConfig.PROCESSADOS.resolve(arquivo.getNome());
+        validarDuplicidade(arquivo);
+        Path destino = PathConfig.PROCESSADOS.resolve(arquivo.getNome());
+
+        try {
             Files.move(arquivo.getLocalizacao(), destino, StandardCopyOption.REPLACE_EXISTING);
             logger.registrarSucesso("Arquivo finalizado com sucesso. Movido para PROCESSADOS: " + arquivo.getNome());
-        }catch (OperacaoInvalidaException | IOException e) {
-            logger.registrarErro("Erro ao finalizar arquivo: " + e.getMessage());
+        } catch (IOException e) {
+            throw new IOException("Falha ao mover arquivo para a pasta PROCESSADOS: " + e.getMessage(), e);
         }
     }
 
@@ -81,7 +81,7 @@ public class ArquivoRepository implements IArquivoRepository {
                 Files.delete(arquivo);
                 deletados++;
             }
-            if(deletados > 0) {
+            if (deletados > 0) {
                 logger.registrarSucesso("Limpeza da quarentena realizada. Arquivos removidos: " + deletados);
             }
         } catch (IOException e) {
@@ -91,7 +91,7 @@ public class ArquivoRepository implements IArquivoRepository {
 
     private void validarDuplicidade(ArquivoImportado arquivo) {
         Path destino = PathConfig.PROCESSADOS.resolve(arquivo.getNome());
-        if(Files.exists(destino)) {
+        if (Files.exists(destino)) {
             throw new OperacaoInvalidaException("Arquivo já processado: " + arquivo.getNome());
         }
     }
