@@ -2,7 +2,6 @@ package Services;
 
 import Contracts.ILeitor;
 import Contracts.ILogger;
-import Models.Lote;
 import Models.Lote.Estado;
 import Models.Transacao;
 import Exceptions.*;
@@ -13,6 +12,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LeitorCaixa implements ILeitor {
     private final ILogger logger;
@@ -22,8 +23,8 @@ public class LeitorCaixa implements ILeitor {
     }
 
     @Override
-    public Transacao lerArquivo(Path caminho) {
-        Transacao transacao = null;
+    public List<Transacao> lerArquivo(Path caminho) {
+        List<Transacao> transacoes = new ArrayList<>();
 
         try (FileChannel canal = FileChannel.open(caminho, StandardOpenOption.READ)) {
             ByteBuffer buffer = ByteBuffer.allocate(64);
@@ -52,12 +53,13 @@ public class LeitorCaixa implements ILeitor {
                     if (valor.compareTo(BigDecimal.ZERO) <= 0) {
                         throw new ValorInvalidoException("Valor inválido encontrado no corpo do arquivo binário.");
                     }
-                    transacao = new Transacao(estado, numeroFilial, origem, destino, valor);
+                    Transacao transacao = new Transacao(estado, numeroFilial, origem, destino, valor);
+                    transacoes.add(transacao);
                 }
                 buffer.clear();
             }
-            if (transacao == null) throw new OperacaoInvalidaException("Arquivo binário vazio ou sem transações válidas.");
-            return transacao;
+            if (transacoes.isEmpty()) throw new OperacaoInvalidaException("Arquivo binário vazio ou sem transações válidas.");
+            return transacoes;
         } catch (IOException e) {
             throw new RuntimeException("Falha técnica no acesso ao arquivo binário", e);
         }

@@ -5,6 +5,8 @@ import Models.*;
 import Exceptions.*;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProcessadorService implements IProcessadorService {
     private final ILeitor leitorAgencia;
@@ -31,16 +33,19 @@ public class ProcessadorService implements IProcessadorService {
             logger.registrarSucesso("Iniciando processamento do arquivo: " + caminho.getFileName());
 
             ILeitor leitor = selecionarLeitor(caminho);
-            Transacao t = leitor.lerArquivo(caminho);
+            List<Transacao> transacoes = leitor.lerArquivo(caminho);
 
             arquivoImportado = repository.preparar(caminho);
 
-            iLoteService.adicionarTransacao(t);
-            relatorio.registrarSucesso(t.getValor());
-            relatorio.incrementarArquivos();
+            for (Transacao t : transacoes) {
+                iLoteService.adicionarTransacao(t);
+                relatorio.registrarSucesso(t.getValor());
+            }
 
+            relatorio.incrementarArquivos();
             repository.finalizarComSucesso(arquivoImportado);
             logger.registrarSucesso("Arquivo processado e finalizado com sucesso: " + caminho.getFileName());
+
         } catch (IOException e) {
             relatorio.registrarFalha();
             logger.registrarErro("Erro de E/S ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());

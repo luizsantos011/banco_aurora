@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LeitorAgencia implements ILeitor {
     private final ILogger logger;
@@ -20,8 +22,8 @@ public class LeitorAgencia implements ILeitor {
     }
 
     @Override
-    public Transacao lerArquivo(Path caminho) {
-        Transacao transacao = null;
+    public List<Transacao> lerArquivo(Path caminho) {
+        List<Transacao> transacoes = new ArrayList<>();
 
         try (BufferedReader br = Files.newBufferedReader(caminho)) {
             String linha;
@@ -52,12 +54,13 @@ public class LeitorAgencia implements ILeitor {
                 } catch (NumberFormatException e) {
                     throw new ValorInvalidoException("Valor numérico inválido na linha: " + linha);
                 }
-                transacao = new Transacao(estado,numeroFilial, origem, destino, valor);
+                Transacao transacao = new Transacao(estado, numeroFilial, origem, destino, valor);
+                transacoes.add(transacao);
             }
 
-            if(transacao == null) throw new OperacaoInvalidaException("Arquivo de texto vazio ou sem transações válidas.");
+            if(transacoes.isEmpty()) throw new OperacaoInvalidaException("Arquivo de texto vazio ou sem transações válidas.");
 
-            return transacao;
+            return transacoes;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
