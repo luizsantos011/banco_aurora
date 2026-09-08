@@ -5,7 +5,6 @@ import Models.*;
 import Exceptions.*;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessadorService implements IProcessadorService {
@@ -47,22 +46,21 @@ public class ProcessadorService implements IProcessadorService {
             logger.registrarSucesso("Arquivo processado e finalizado com sucesso: " + caminho.getFileName());
 
         } catch (IOException e) {
-            relatorio.registrarFalha();
-            logger.registrarErro("Erro de E/S ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());
-            repository.tratarFalha(caminho);
+            tratarErro(e, "Erro de E/S ao processar arquivo: ", caminho, arquivoImportado);
         } catch (FormatoArquivoInvalidoException | ValorInvalidoException | OperacaoInvalidaException e) {
-            relatorio.registrarFalha();
-            logger.registrarErro("Erro de validação de negócio no arquivo: " + caminho.getFileName() + " - " + e.getMessage());
-            repository.tratarFalha(caminho);
+            tratarErro(e, "Erro de validação de negócio no arquivo: ", caminho, arquivoImportado);
         } catch (RuntimeException e) {
-            relatorio.registrarFalha();
-            logger.registrarErro("Erro de runtime ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());
-            repository.tratarFalha(caminho);
+            tratarErro(e, "Erro de runtime ao processar arquivo: ", caminho, arquivoImportado);
         } catch (Exception e) {
-            relatorio.registrarFalha();
-            logger.registrarErro("Erro inesperado (Exception) ao processar arquivo: " + caminho.getFileName() + " - " + e.getMessage());
-            repository.tratarFalha(caminho);
+            tratarErro(e, "Erro inesperado (Exception) ao processar arquivo: ", caminho, arquivoImportado);
         }
+    }
+
+    private void tratarErro(Exception e, String mensagemLog, Path caminhoOriginal, ArquivoImportado arquivoImportado) {
+        relatorio.registrarFalha();
+        logger.registrarErro(mensagemLog + caminhoOriginal.getFileName() + " - " + e.getMessage());
+        Path caminhoAtual = (arquivoImportado != null) ? arquivoImportado.getLocalizacao() : caminhoOriginal;
+        repository.tratarFalha(caminhoAtual);
     }
 
     private ILeitor selecionarLeitor(Path caminho) {
