@@ -18,7 +18,7 @@ public class Lote {
 
     public Lote(Estado estado, int numeroFilial) {
         validarSequencial(numeroFilial);
-        this.id = String.format("%s-%04d", numeroFilial);
+        this.id = String.format("%s-%04d",estado,  numeroFilial);
         this.estado = estado;
         this.dataCriacao = LocalDateTime.now();
         this.valorTotal = BigDecimal.ZERO;
