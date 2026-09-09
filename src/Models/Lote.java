@@ -12,21 +12,21 @@ public class Lote {
     private final Estado estado;
     private final LocalDateTime dataCriacao;
     private BigDecimal valorTotal;
-    private List<Transacao> transacoes;
+    private final List<Transacao> transacoes;
 
     public enum Estado { SE, BA, AL, PE }
 
     public Lote(Estado estado, int numeroFilial) {
         validarSequencial(numeroFilial);
-        this.id = String.format("%s-%04d",estado,  numeroFilial);
+        this.id = String.format("%s-%04d", estado, numeroFilial);
         this.estado = estado;
         this.dataCriacao = LocalDateTime.now();
         this.valorTotal = BigDecimal.ZERO;
         this.transacoes = new ArrayList<>();
     }
 
-    private void validarSequencial(int sequencial){
-        if(sequencial < 1 || sequencial > 9999)throw new IdInvalidoException("Sequencial deve estar entre 1 e 9999");
+    private void validarSequencial(int sequencial) {
+        if (sequencial < 1 || sequencial > 9999) throw new IdInvalidoException("Sequencial deve estar entre 1 e 9999");
     }
 
     public void adicionarTransacao(Transacao t) {
@@ -39,5 +39,5 @@ public class Lote {
     public Estado getEstado() { return estado; }
     public LocalDateTime getDataCriacao() { return dataCriacao; }
     public BigDecimal getValorTotal() { return valorTotal; }
-    public List<Transacao> getTransacoes() { return transacoes; }
+    public List<Transacao> getTransacoes() { return List.copyOf(transacoes); }
 }
