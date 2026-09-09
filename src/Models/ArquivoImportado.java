@@ -27,7 +27,7 @@ public class ArquivoImportado {
         if(nome == null)throw new NullPointerException("Nome do arquivo não pode ser nulo.");
         if(nome.isBlank())throw new IllegalArgumentException("Nome do arquivo não pode ser vazio.");
         if(!nome.toLowerCase().endsWith(".txt") && !nome.toLowerCase().endsWith(".bin")){
-            throw new NomeInvalidoException("Nome do arquivo deve terminar com .txt ou .dat");
+            throw new NomeInvalidoException("Nome do arquivo deve terminar com .txt ou .bin");
         }
     }
 
