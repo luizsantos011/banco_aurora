@@ -1,8 +1,10 @@
 package Models;
 
 import Exceptions.ContaInvalidaException;
+import Exceptions.IdInvalidoException;
 import Exceptions.ValorInvalidoException;
-import Models.Lote.*;
+import Models.Lote.Estado;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,24 +19,38 @@ public class Transacao {
     private final BigDecimal valor;
     private final LocalDateTime dataTransacao;
 
-    public Transacao(Estado estado, int numeroFilial, String origem, String destino,  BigDecimal valor) {
+    public Transacao(Estado estado, int numeroFilial, String origem, String destino, BigDecimal valor) {
+        validarEstado(estado);
+        validarNumeroFilial(numeroFilial);
         validarContas(origem, destino);
         validarValor(valor);
         this.codigoTransacao = UUID.randomUUID().toString();
         this.estado = estado;
         this.numeroFilial = numeroFilial;
-        this.idTransacao = String.format("%s-%d-%s",estado,numeroFilial,codigoTransacao);
+        this.idTransacao = String.format("%s-%d-%s", estado, numeroFilial, codigoTransacao);
         this.origem = origem;
         this.destino = destino;
         this.valor = valor;
         this.dataTransacao = LocalDateTime.now();
     }
 
+    private void validarEstado(Estado estado) {
+        if (estado == null) {
+            throw new IllegalArgumentException("Estado não pode ser nulo!");
+        }
+    }
+
+    private void validarNumeroFilial(int numeroFilial) {
+        if (numeroFilial < 1 || numeroFilial > 9999) {
+            throw new IdInvalidoException("Número da filial deve estar entre 1 e 9999!");
+        }
+    }
+
     private void validarContas(String origem, String destino) {
-        if(origem == null || destino == null || origem.isBlank() || destino.isBlank()) {
+        if (origem == null || destino == null || origem.isBlank() || destino.isBlank()) {
             throw new ContaInvalidaException("Contas de origem e destino devem ser informadas!");
         }
-        if(origem.equals(destino)) {
+        if (origem.equals(destino)) {
             throw new ContaInvalidaException("As contas não podem ser iguais!");
         }
     }
@@ -63,5 +79,17 @@ public class Transacao {
 
     public BigDecimal getValor() {
         return valor;
+    }
+
+    public String getCodigoTransacao() {
+        return codigoTransacao;
+    }
+
+    public String getIdTransacao() {
+        return idTransacao;
+    }
+
+    public LocalDateTime getDataTransacao() {
+        return dataTransacao;
     }
 }
