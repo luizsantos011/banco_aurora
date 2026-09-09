@@ -22,7 +22,7 @@ public class LeitorAgencia implements ILeitor {
     }
 
     @Override
-    public List<Transacao> lerArquivo(Path caminho) {
+    public List<Transacao> lerArquivo(Path caminho) throws IOException {
         List<Transacao> transacoes = new ArrayList<>();
 
         try (BufferedReader br = Files.newBufferedReader(caminho)) {
@@ -58,12 +58,11 @@ public class LeitorAgencia implements ILeitor {
                 transacoes.add(transacao);
             }
 
-            if(transacoes.isEmpty()) throw new OperacaoInvalidaException("Arquivo de texto vazio ou sem transações válidas.");
+            if (transacoes.isEmpty()) {
+                throw new OperacaoInvalidaException("Arquivo de texto vazio ou sem transações válidas.");
+            }
 
             return transacoes;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }
-
