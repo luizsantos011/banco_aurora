@@ -73,7 +73,16 @@ public class LeitorCaixa implements ILeitor {
                 }
                 buffer.compact();
             }
-            if (transacoes.isEmpty()) throw new OperacaoInvalidaException("Arquivo binário vazio ou sem transações válidas.");
+
+            buffer.flip();
+            if (buffer.hasRemaining()) {
+                throw new FormatoArquivoInvalidoException("Arquivo binário encerra com mensagem incompleta.");
+            }
+
+            if (transacoes.isEmpty()) {
+                throw new OperacaoInvalidaException("Arquivo binário vazio ou sem transações válidas.");
+            }
+
             return transacoes;
         } catch (IOException e) {
             throw new RuntimeException("Falha técnica no acesso ao arquivo binário", e);
