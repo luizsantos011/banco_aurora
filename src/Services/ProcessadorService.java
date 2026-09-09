@@ -72,8 +72,6 @@ public class ProcessadorService implements IProcessadorService {
             logger.registrarSucesso("Leitor de Caixa selecionado para: " + nomeArquivo);
             return leitorCaixa;
         } else {
-            logger.registrarErro("Nenhum leitor compatível encontrado para: " + nomeArquivo);
-            repository.tratarFalha(caminho);
             throw new FormatoArquivoInvalidoException("Formato de arquivo não suportado: " + nomeArquivo);
         }
     }
