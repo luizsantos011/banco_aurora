@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LeitorCaixa implements ILeitor {
+    private static final int TAMANHO_PAYLOAD_ESPERADO = 55;
     private final ILogger logger;
 
     public LeitorCaixa(ILogger logger) {
@@ -35,7 +36,13 @@ public class LeitorCaixa implements ILeitor {
                     buffer.mark();
                     int tamanhoPayLoad = buffer.getInt();
 
-                    if(buffer.remaining() <  tamanhoPayLoad) {
+                    if (tamanhoPayLoad != TAMANHO_PAYLOAD_ESPERADO) {
+                        throw new FormatoArquivoInvalidoException(
+                                "Tamanho de payload inválido no arquivo binário: " + tamanhoPayLoad + " bytes (esperado: 55)"
+                        );
+                    }
+
+                    if (buffer.remaining() < tamanhoPayLoad) {
                         buffer.reset();
                         break;
                     }
